@@ -1,10 +1,17 @@
 cmake_minimum_required(VERSION 3.4...3.18)
 project(cmake_example)
 
-add_subdirectory(pybind11)
-pybind11_add_module(cmake_example src/main.cpp)
+# create static library (will create .a file)
+add_library(my_math STATIC src/my_math.cpp)
 
-# EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
-# define (VERSION_INFO) here.
-target_compile_definitions(cmake_example
-                           PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
+set_target_properties(my_math PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# could deploy my_math as C++ library (ship headers and .a file)
+# create executable for unit testing
+# create separate executable
+
+add_subdirectory(pybind11)
+pybind11_add_module(cmake_example src/pybind_wrapper.cpp)
+
+# link the 2 libraries (PRIVATE bc othing downstream needs to see the dependency on my_math)
+target_link_libraries(cmake_example PRIVATE my_math)
